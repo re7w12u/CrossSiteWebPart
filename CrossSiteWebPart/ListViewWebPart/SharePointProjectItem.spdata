@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ProjectItem Type="Microsoft.VisualStudio.SharePoint.WebPart" DefaultFile="ListViewWebPart.cs" SupportedTrustLevels="All" SupportedDeploymentScopes="Site" xmlns="http://schemas.microsoft.com/VisualStudio/2010/SharePointTools/SharePointProjectItemModel">
+  <Files>
+    <ProjectItemFile Source="Elements.xml" Target="ListViewWebPart\" Type="ElementManifest" />
+    <ProjectItemFile Source="ListViewWebPart.webpart" Target="ListViewWebPart\" Type="ElementFile" />
+  </Files>
+  <SafeControls>
+    <SafeControl Name="SafeControlEntry1" Assembly="$SharePoint.Project.AssemblyFullName$" Namespace="CrossSiteWebPart.ListViewWebPart" TypeName="*" IsSafe="true" IsSafeAgainstScript="true" />
+  </SafeControls>
+</ProjectItem>

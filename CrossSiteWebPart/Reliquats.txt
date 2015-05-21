@@ -1,0 +1,165 @@
+﻿     /*****************************/
+	 //query.ViewAttributes = "Scope=\"Recursive\"";
+                        string queryString = string.Empty;
+
+                        if (!string.IsNullOrEmpty(this.Context.Request.QueryString["Paged"]) && !string.IsNullOrEmpty(this.Context.Request.QueryString["View"]))
+                        {
+                            foreach (string key in this.Context.Request.QueryString.Keys)
+                            {
+                                if (key.ToLower() != "view")
+                                {
+                                    queryString += key + "=" + this.Context.Request.QueryString[key] + "&";
+                                }
+                            }
+
+                            Console.WriteLine("{0}", queryString);
+
+                            //SPUtility.Redirect(this.Context.Request.Url.GetLeftPart(UriPartial.Path), SPRedirectFlags.Default, HttpContext.Current, queryString);
+                            // return;
+                        }
+
+                        string queryFilter = BuildFilter();
+
+                        //string fieldName = string.Empty;
+                        //string sortOrder = string.Empty;
+                        string queryOrder = string.Empty;
+
+                        if (this.Context.Request["SortField"] != null && this.Context.Request["SortDir"] != null)
+                        {
+                            // generate the Caml query
+                            var fieldName = this.Context.Request["SortField"];
+                            var sortOrder = (this.Context.Request["SortDir"] == "Asc") ? "true" : "false";
+                            queryOrder = string.Format("<OrderBy><FieldRef Name='{0}' Ascending='{1}' /></OrderBy>", fieldName, sortOrder);
+                        }
+
+                        /*
+                        string filterfield = string.Empty;
+                        string filtervalue = string.Empty;
+
+                        if (this.Context.Request["filterfield"] != null && this.Context.Request["filtervalue"] != null)
+                        {
+                            filterfield = this.Context.Request["filterfield"];
+                            filtervalue = this.Context.Request["filtervalue"];
+                        }
+                        */
+
+                        Console.WriteLine("{0}", queryFilter);
+                        //Console.WriteLine("{0}\r\n{1}", filterfield, filtervalue);
+
+                        // Console.WriteLine("{0}\r\n{1}\r\n{2}", fieldName, sortOrder, queryOrder);
+	 
+	 /****************************/   
+		
+		
+		
+		
+                        // La propriété AllowEveryoneViewItems ne s'applique pas à tous les éléments de liste, mais uniquement pour les bibliothèques de documents
+                        // ou de pièces jointes dans les éléments de la liste. 
+                        // Cette propriété fonctionne uniquement lorsque les utilisateurs accèdent directement à un fichier via le navigateur, 
+                        // et qu'il n'a aucun effet sur le reste de l'interface utilisateur ou du modèle d'objet.
+
+                        // viewByQuery.List.AllowEveryoneViewItems = true;
+                        //viewByQuery.List.Update();		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		protected void old_CreateChildControls()
+        {
+            base.CreateChildControls();
+            SPSite site = null;
+            SPWeb web = null;
+            Boolean disposeSPSite = false;
+            try
+            {
+                if (!string.IsNullOrEmpty(SiteUrl) && !string.IsNullOrWhiteSpace(SourceList))
+                {
+                    viewByQuery = new ListViewByQuery();
+                    if (!string.IsNullOrEmpty(SiteUrl) && !string.IsNullOrWhiteSpace(SiteUrl))
+                    {
+                        // cross site
+                        site = new SPSite(this.SiteUrl);
+                        disposeSPSite = true;
+                    }
+                    else
+                    {
+                        // current context site
+                        site = SPContext.Current.Site;
+                    }
+
+                    web = site.OpenWeb();
+
+                    Guid webID = web.ID;
+                    Guid siteID = site.ID;
+
+                    Console.WriteLine("webID : {0}\nsiteID : {1}", webID, siteID);
+
+                    // ElevatedPrivileges(web, site);
+
+                    SPList sourceList = web.Lists.TryGetList(SourceList);
+
+                    // return if null or if list is missing
+                    if (sourceList == null) return;
+
+                    viewByQuery.List = sourceList;
+                    SPQuery query = null;
+
+                    // check if view exist in site
+                    if (CheckIfViewExists(viewByQuery.List))
+                    {
+                        //use the view specified in webpart property
+                        query = new SPQuery(viewByQuery.List.Views[ViewName]);
+                    }
+                    else
+                    {
+                        //use default view to initialized
+                        query = new SPQuery(viewByQuery.List.DefaultView);
+                        //query = new SPQuery(sourceList.DefaultView);
+                    }
+
+                    //query = new SPQuery(sourceList.DefaultView);
+                    query.ViewAttributes = "Scope=\"Recursive\"";
+                    viewByQuery.Query = query;
+                    viewByQuery.DisableFilter = DisableFilter;
+                    viewByQuery.DisableSort = DisableSort;
+                    Controls.Add(viewByQuery);
+                }
+                else
+                {
+                    encodedLiteral = new EncodedLiteral();
+                    encodedLiteral.Text = "This webpart is not configured.";
+                    Controls.Add(encodedLiteral);
+                }
+            }
+            finally
+            {
+                if (disposeSPSite)
+                {
+                    ((IDisposable)site).Dispose();
+                    ((IDisposable)web).Dispose();
+                }
+            }
+        }
+
+        /*
+        // Override default implementation to Render children according to needs.
+        protected override void RenderChildren(HtmlTextWriter output)
+        {
+            if (HasControls())
+            {
+                // Render Children in reverse order.
+                for (int i = Controls.Count - 1; i >= 0; --i)
+                {
+                    Controls[i].RenderControl(output);
+                }
+            }
+        }
+        */
